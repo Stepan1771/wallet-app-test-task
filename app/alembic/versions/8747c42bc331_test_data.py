@@ -53,7 +53,7 @@ def upgrade() -> None:
             'uuid_wallet': wallet_uuids[0],
             'date_time': base_date + timedelta(days=i),
             'operation': 'deposit',
-            'description': f'Пополнение счета #{i + 1}'
+            'description': f'amount'
         } for i in range(5)
     ])
 
@@ -62,7 +62,7 @@ def upgrade() -> None:
             'uuid_wallet': wallet_uuids[0],
             'date_time': base_date + timedelta(days=10 + i),
             'operation': 'withdraw',
-            'description': f'Снятие наличных #{i + 1}'
+            'description': f'amount'
         } for i in range(3)
     ])
 
@@ -71,7 +71,7 @@ def upgrade() -> None:
             'uuid_wallet': wallet_uuids[0],
             'date_time': base_date + timedelta(days=15 + i),
             'operation': 'withdraw',
-            'description': f'Перевод средств #{i + 1}'
+            'description': f'amount'
         } for i in range(2)
     ])
 
@@ -81,7 +81,7 @@ def upgrade() -> None:
             'uuid_wallet': wallet_uuids[1],
             'date_time': base_date + timedelta(days=2 + i),
             'operation': 'deposit',
-            'description': f'Зарплатное пополнение #{i + 1}'
+            'description': f'amount'
         } for i in range(4)
     ])
 
@@ -90,7 +90,7 @@ def upgrade() -> None:
             'uuid_wallet': wallet_uuids[1],
             'date_time': base_date + timedelta(days=12 + i),
             'operation': 'withdraw',
-            'description': f'Оплата услуг #{i + 1}'
+            'description': f'amount'
         } for i in range(3)
     ])
 
@@ -100,7 +100,7 @@ def upgrade() -> None:
             'uuid_wallet': wallet_uuids[2],
             'date_time': base_date + timedelta(days=5 + i),
             'operation': 'deposit',
-            'description': f'Инвестиционное пополнение #{i + 1}'
+            'description': f'amount'
         } for i in range(6)
     ])
 
@@ -109,7 +109,7 @@ def upgrade() -> None:
             'uuid_wallet': wallet_uuids[2],
             'date_time': base_date + timedelta(days=20 + i),
             'operation': 'withdraw',
-            'description': f'Снятие инвестиций #{i + 1}'
+            'description': f'amount'
         } for i in range(2)
     ])
 
