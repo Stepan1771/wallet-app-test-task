@@ -10,7 +10,6 @@ from starlette import status
 from core.models import Wallet
 from core.schemas.operation import OperationCreate
 
-
 import utils
 
 
@@ -61,11 +60,7 @@ async def get_wallet_operations(
 async def create_wallet(
         session: AsyncSession,
 ):
-    wallet_uuid = str(uuid.uuid4())
-    wallet = Wallet(
-        uuid=wallet_uuid,
-        balance=0.0,
-    )
+    wallet = Wallet()
     session.add(wallet)
     await session.commit()
     await session.refresh(wallet)
