@@ -2,6 +2,7 @@ from typing import Annotated, List
 
 from fastapi import APIRouter, Depends, Path
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette import status
 
 from database import db_helper
 
@@ -26,7 +27,8 @@ router = APIRouter(
 @router.get(
     "/all",
     response_model=List[WalletResponse],
-    summary="Получить все кошельки"
+    summary="Получить все кошельки",
+    status_code=status.HTTP_200_OK,
 )
 async def get_all_wallets(
         session: Annotated[
@@ -47,6 +49,7 @@ async def get_all_wallets(
     "/{wallet_uuid}",
     response_model=WalletResponse,
     summary="Получить баланс кошелька по UUID",
+    status_code=status.HTTP_200_OK,
 )
 async def get_wallet_balance(
         session: Annotated[
@@ -66,6 +69,7 @@ async def get_wallet_balance(
     "/create-wallet",
     response_model=WalletResponse,
     summary="Создать кошелек",
+    status_code=status.HTTP_201_CREATED,
 )
 async def create_wallet(
         session: Annotated[
@@ -83,6 +87,7 @@ async def create_wallet(
     "/{wallet_uuid}/operation",
     response_model=WalletOperationResponse,
     summary="Создать операцию кошелька",
+    status_code=status.HTTP_201_CREATED,
 )
 async def create_wallet_operation(
         session: Annotated[
@@ -110,6 +115,7 @@ async def create_wallet_operation(
     "/{wallet_uuid}/wallet-operations",
     response_model=WalletOperationsResponse,
     summary="Получить все операции кошелька по UUID",
+    status_code=status.HTTP_200_OK,
 )
 async def get_wallet_operations(
         session: Annotated[
@@ -133,6 +139,7 @@ async def get_wallet_operations(
 @router.delete(
     "/delete",
     summary="Удалить кошелек по UUID",
+    status_code=status.HTTP_204_NO_CONTENT,
 )
 async def delete_wallet(
         session: Annotated[
