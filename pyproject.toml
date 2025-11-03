@@ -15,7 +15,9 @@ dependencies = [
     "pydantic (>=2.12.3,<3.0.0)",
     "alembic (>=1.17.1,<2.0.0)",
     "pytest (>=8.4.2,<9.0.0)",
-    "pytest-asyncio (>=1.2.0,<2.0.0)"
+    "pytest-asyncio (>=1.2.0,<2.0.0)",
+    "pydantic-settings (>=2.11.0,<3.0.0)",
+    "orjson (>=3.11.4,<4.0.0)"
 ]
 
 
