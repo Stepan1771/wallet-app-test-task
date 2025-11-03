@@ -67,6 +67,11 @@ async def get_wallet_operations(
             .filter(Wallet.uuid == wallet_uuid)
         )
         wallet = stmt.scalar_one_or_none()
+        if not wallet:
+            raise HTTPException(
+                status_code=404,
+                detail="Wallet not found",
+            )
         return wallet
 
     except Exception as e:
