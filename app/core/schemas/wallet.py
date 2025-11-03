@@ -6,24 +6,33 @@ from core.schemas.operation import OperationResponse
 
 
 class WalletBase(BaseModel):
-    uuid: str
-
     model_config = ConfigDict(
         from_attributes=True,
     )
 
 
 class WalletResponse(WalletBase):
+    uuid: str
     balance: float
 
 
 class WalletOperationResponse(WalletBase):
+    wallet: WalletResponse
+    operation: OperationResponse
+
+    model_config = ConfigDict(
+        from_attributes=True,
+    )
+
+
+class WalletOperationsResponse(WalletBase):
+    uuid: str
     balance: float
     operations: List[OperationResponse]
 
 
 class WalletDelete(WalletBase):
-    pass
+    uuid: str
 
 
 
