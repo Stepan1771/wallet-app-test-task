@@ -3,10 +3,16 @@ from typing import Annotated, List
 from fastapi import APIRouter, Depends, Path
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from database import db_helper
+
 from core.config import settings
 from core.schemas.operation import OperationCreate
-from core.schemas.wallet import WalletResponse, WalletDelete, WalletBase, WalletOperationResponse
-from database import db_helper
+from core.schemas.wallet import (
+    WalletResponse,
+    WalletDelete,
+    WalletOperationsResponse,
+    WalletOperationResponse,
+)
 
 from crud import wallets as crud_wallets
 
@@ -51,7 +57,7 @@ async def get_wallet_balance(
 ):
     wallet = await crud_wallets.get_wallet_balance_by_uuid(
         session=session,
-        uuid=wallet_uuid,
+        wallet_uuid=wallet_uuid,
     )
     return WalletResponse.model_validate(wallet)
 
@@ -67,13 +73,15 @@ async def create_wallet(
             Depends(db_helper.session_getter),
         ],
 ):
-    wallet = await crud_wallets.create_wallet(session=session)
+    wallet = await crud_wallets.create_wallet(
+        session=session,
+    )
     return WalletResponse.model_validate(wallet)
 
 
 @router.post(
     "/{wallet_uuid}/operation",
-    response_model=WalletResponse,
+    response_model=WalletOperationResponse,
     summary="Создать операцию кошелька",
 )
 async def create_wallet_operation(
@@ -82,19 +90,25 @@ async def create_wallet_operation(
             Depends(db_helper.session_getter),
         ],
         operation_schema: OperationCreate,
-        wallet_uuid: str = Path(..., description="Wallet UUID"),
+        wallet_uuid: str = Path(
+            ...,
+            description="Wallet UUID",
+        ),
 ):
-    wallet = await crud_wallets.create_operation(
+    wallet, operation = await crud_wallets.create_wallet_operation(
         session=session,
-        uuid=wallet_uuid,
+        wallet_uuid=wallet_uuid,
         operation_schema=operation_schema,
     )
-    return WalletResponse.model_validate(wallet)
+    return WalletOperationResponse(
+        wallet=wallet,
+        operation=operation,
+    )
 
 
 @router.get(
     "/{wallet_uuid}/wallet-operations",
-    response_model=WalletOperationResponse,
+    response_model=WalletOperationsResponse,
     summary="Получить все операции кошелька по UUID",
 )
 async def get_wallet_operations(
@@ -102,16 +116,24 @@ async def get_wallet_operations(
             AsyncSession,
             Depends(db_helper.session_getter),
         ],
-        wallet_uuid: str = Path(..., description="Wallet UUID"),
+        wallet_uuid: str = Path(
+            ...,
+            description="Wallet UUID",
+        ),
 ):
     wallet = await crud_wallets.get_wallet_operations(
         session=session,
-        uuid=wallet_uuid,
+        wallet_uuid=wallet_uuid,
     )
-    return WalletOperationResponse.model_validate(wallet)
+    return WalletOperationsResponse.model_validate(
+        wallet,
+    )
 
 
-@router.delete("/delete", summary="Удалить кошелек по UUID")
+@router.delete(
+    "/delete",
+    summary="Удалить кошелек по UUID",
+)
 async def delete_wallet(
         session: Annotated[
             AsyncSession,
@@ -121,6 +143,6 @@ async def delete_wallet(
 ):
     result = await crud_wallets.delete_wallet(
         session=session,
-        uuid=delete_schema.uuid,
+        wallet_uuid=delete_schema.uuid,
     )
     return result
