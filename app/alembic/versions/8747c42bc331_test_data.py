@@ -1,10 +1,3 @@
-"""test data
-
-Revision ID: 8747c42bc331
-Revises: e032f2b2bb3d
-Create Date: 2025-11-01 21:54:55.745666
-
-"""
 from typing import Sequence, Union
 from datetime import datetime, timedelta
 import uuid
@@ -12,7 +5,6 @@ from alembic import op
 import sqlalchemy as sa
 
 
-# revision identifiers, used by Alembic.
 revision: str = '8747c42bc331'
 down_revision: Union[str, Sequence[str], None] = 'e032f2b2bb3d'
 branch_labels: Union[str, Sequence[str], None] = None
@@ -20,10 +12,8 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # Создаем подключение для выполнения сырых SQL запросов
     conn = op.get_bind()
 
-    # Тестовые кошельки
     wallet_uuids = [
         str(uuid.uuid4()),  # wallet 1
         str(uuid.uuid4()),  # wallet 2
