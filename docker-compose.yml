@@ -16,23 +16,6 @@ services:
       timeout: 3s
       retries: 3
 
-  test_postgres:
-    image: postgres:15
-    environment:
-      POSTGRES_DB: test_wallet
-      POSTGRES_USER: test_user
-      POSTGRES_PASSWORD: test_password
-      PGDATA: /var/lib/postgresql/test_data
-    ports:
-      - "5433:5432"
-    volumes:
-      - test_pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready" ]
-      interval: 5s
-      timeout: 3s
-      retries: 3
-
   pgadmin:
     image: dpage/pgadmin4
     environment:
@@ -45,4 +28,3 @@ services:
 
 volumes:
   pgdata:
-  test_pgdata:
