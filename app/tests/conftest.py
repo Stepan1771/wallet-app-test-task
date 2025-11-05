@@ -1,144 +1,95 @@
-import asyncio
-
-from datetime import datetime
-from typing import AsyncGenerator
-from typing import Generator
-
 import pytest
 import pytest_asyncio
+from typing import AsyncGenerator
 from httpx import AsyncClient, ASGITransport
-from sqlalchemy.pool import NullPool
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
-from sqlalchemy.ext.asyncio import create_async_engine
+from unittest.mock import patch
 
+from main import main_app as app
 
-from main import main_app
-from tests.test_config.test_base import Base
-from tests.test_config.test_config import get_db
+from tests.mock_data import (
+    reset_mock_db,
+    add_mock_wallet,
+    MockWallet,
+    MockOperation,
+    add_mock_operation,
+)
 
 
 @pytest.fixture(scope="session")
-def event_loop() -> Generator:
-    """
-    Создаёт event loop для всей сессии тестирования.
-    Необходимо для корректной работы async фикстур.
-    """
-    loop = asyncio.get_event_loop_policy().new_event_loop()
-    yield loop
-    loop.close()
+def event_loop_policy():
+    import asyncio
+    import sys
+
+    if sys.platform == "win32":
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+    return asyncio.get_event_loop_policy()
 
 
-@pytest_asyncio.fixture(scope="session")
-async def test_engine():
-    """
-    Создаёт async engine для тестовой базы данных.
-    Scope='session' - создаётся один раз на всю сессию тестов.
-    """
-    engine = create_async_engine(
-        url=str("postgresql+asyncpg://test_user:test_password@localhost:5433/test_wallet"),
-        echo=True,  # Установите True для отладки SQL-запросов
-        poolclass=NullPool,  # Отключаем пул соединений для тестов
-    )
-
-    # Создаём таблицы один раз
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
-        await conn.run_sync(Base.metadata.create_all)
-
-    yield engine
-
-    # Удаляем таблицы после всех тестов
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
-
-    await engine.dispose()
-
-
-@pytest_asyncio.fixture(scope="function")
-async def db_session(test_engine) -> AsyncGenerator[AsyncSession, None]:
-    """
-    Создаёт новую сессию БД для каждого теста с откатом транзакции.
-    """
-
-    connection = await test_engine.connect()
-    transaction = await connection.begin()
-
-    async_session_maker = async_sessionmaker(
-        bind=connection,
-        class_=AsyncSession,
-        expire_on_commit=False,
-        autocommit=False,
-        autoflush=False,
-    )
-
-    async with async_session_maker() as session:
-        yield session
-
-        await session.rollback()
-
-    await transaction.rollback()
-    await connection.close()
-
+@pytest.fixture(autouse=True)
+def clear_mock_db():
+    reset_mock_db()
+    yield
+    reset_mock_db()
 
 
 @pytest_asyncio.fixture
-async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
-    """
-    Создаёт HTTP клиент для тестирования API.
-    Переопределяет зависимость get_db для использования тестовой БД.
-    """
+async def client() -> AsyncGenerator[AsyncClient, None]:
 
-    async def override_get_db() -> AsyncGenerator[AsyncSession, None]:
-        yield db_session
-
-    main_app.dependency_overrides[get_db] = override_get_db
-
-    async with AsyncClient(
-        transport=ASGITransport(app=main_app),
-        base_url="http://test",
-    ) as ac:
-        yield ac
-
-    main_app.dependency_overrides.clear()
-
-
-@pytest_asyncio.fixture
-async def test_wallet(db_session: AsyncSession):
-    """
-    Создаёт тестового пользователя в БД.
-    Пример - адаптируйте под свою модель User.
-    """
-    from tests.test_config.test_wallet import Wallet
-
-    wallet = Wallet(
-        uuid="test",
-        balance=100.0,
+    from tests.mock_crud import (
+        mock_get_wallet_balance_by_uuid,
+        mock_create_wallet,
+        mock_get_all_wallets,
+        mock_delete_wallet,
+        mock_create_wallet_operation,
+        mock_get_wallet_operations
     )
-    db_session.add(wallet)
-    await db_session.commit()
-    await db_session.refresh(wallet)
 
-    db_session.expunge(wallet)
+    with patch(
+            "crud.wallets.get_wallet_balance_by_uuid",
+            mock_get_wallet_balance_by_uuid
+    ), patch(
+        "crud.wallets.create_wallet",
+        mock_create_wallet
+    ), patch(
+        "crud.wallets.get_all_wallets",
+        mock_get_all_wallets
+    ), patch(
+        "crud.wallets.delete_wallet",
+        mock_delete_wallet
+    ), patch(
+        "crud.wallets.create_wallet_operation",
+        mock_create_wallet_operation
+    ), patch(
+        "crud.wallets.get_wallet_operations",
+        mock_get_wallet_operations
+    ):
+        async with AsyncClient(
+                transport=ASGITransport(app=app),
+                base_url="http://test",
+        ) as ac:
+            yield ac
 
+
+@pytest.fixture
+def sample_wallet():
+    wallet = MockWallet(
+        balance=1000,
+    )
+    add_mock_wallet(wallet)
     return wallet
 
 
-@pytest_asyncio.fixture
-async def test_operation(db_session: AsyncSession, test_wallet):
-    """
-    Создаёт тестового пользователя в БД.
-    Пример - адаптируйте под свою модель User.
-    """
-    from tests.test_config.test_operation import Operation
-
-    operation = Operation(
-        uuid_wallet="test",
-        date_time=datetime(2024, 1, 1, 10, 0, 0),
-        operation="deposit",
-        description="100",
-    )
-    db_session.add(operation)
-    await db_session.commit()
-    await db_session.refresh(operation)
-
+@pytest.fixture
+def sample_operation():
+    operation = MockOperation()
+    add_mock_operation(operation)
     return operation
+
+
+@pytest.fixture
+def empty_wallet():
+    wallet = MockWallet(balance=0)
+    add_mock_wallet(wallet)
+    return wallet
+
