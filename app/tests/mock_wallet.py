@@ -6,6 +6,7 @@ class MockWallet:
     uuid: str
     balance: float
 
+
     def __init__(
             self,
             uuid: str = "119D2163-F16A-47AF-9DF7-418D3AF1455A",

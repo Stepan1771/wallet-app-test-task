@@ -1,13 +1,22 @@
 from datetime import datetime
 
-from tests.conftest import sample_wallet
-from tests.mock_data import get_mock_wallet, MockWallet, add_mock_wallet, delete_mock_wallet, MockOperation, \
-    add_mock_operation, get_mock_operation
+from tests.mock_data import (
+    get_mock_wallet,
+    MockWallet,
+    add_mock_wallet,
+    delete_mock_wallet,
+    MockOperation,
+    add_mock_operation,
+)
 from fastapi import HTTPException
+
 from starlette import status
 
 
-async def mock_get_wallet_balance_by_uuid(session, wallet_uuid: str):
+async def mock_get_wallet_balance_by_uuid(
+        session,
+        wallet_uuid: str,
+):
     wallet = get_mock_wallet(wallet_uuid)
     if wallet is None:
         raise HTTPException(
@@ -18,23 +27,36 @@ async def mock_get_wallet_balance_by_uuid(session, wallet_uuid: str):
     return wallet
 
 
-async def mock_create_wallet(session):
+async def mock_create_wallet(
+        session,
+):
     wallet = MockWallet(balance=0)
     add_mock_wallet(wallet)
     return wallet
 
 
-async def mock_get_all_wallets(session):
-    wallet1 = MockWallet(balance=0)
-    wallet2 = MockWallet(balance=50.2)
-    wallet3 = MockWallet(balance=350.50)
+async def mock_get_all_wallets(
+        session,
+):
+    wallet1 = MockWallet(
+        balance=0,
+    )
+    wallet2 = MockWallet(
+        balance=50.2,
+    )
+    wallet3 = MockWallet(
+        balance=350.50,
+    )
     add_mock_wallet(wallet1)
     add_mock_wallet(wallet2)
     add_mock_wallet(wallet3)
     return [wallet1, wallet2, wallet3]
 
 
-async def mock_delete_wallet(session, wallet_uuid: str):
+async def mock_delete_wallet(
+        session,
+        wallet_uuid: str,
+):
     wallet = get_mock_wallet(wallet_uuid)
     if wallet is None:
         raise HTTPException(
@@ -48,7 +70,10 @@ async def mock_delete_wallet(session, wallet_uuid: str):
 
 
 
-async def mock_create_wallet_operation(session, wallet_uuid: str, operation_schema):
+async def mock_create_wallet_operation(
+        session,
+        wallet_uuid: str, operation_schema,
+):
     wallet = get_mock_wallet(wallet_uuid)
     if not wallet:
         raise HTTPException(
@@ -57,7 +82,10 @@ async def mock_create_wallet_operation(session, wallet_uuid: str, operation_sche
         )
 
     amount = str(operation_schema.amount)
-    operation = MockOperation(uuid_wallet=wallet_uuid, description=amount)
+    operation = MockOperation(
+        uuid_wallet=wallet_uuid,
+        description=amount,
+    )
 
     if operation_schema.operation_type == "deposit":
         wallet.balance += float(str(operation_schema.amount))
@@ -74,7 +102,10 @@ async def mock_create_wallet_operation(session, wallet_uuid: str, operation_sche
     return wallet, operation
 
 
-async def mock_get_wallet_operations(session, wallet_uuid: str):
+async def mock_get_wallet_operations(
+        session,
+        wallet_uuid: str,
+):
     wallet = get_mock_wallet(wallet_uuid)
     if wallet is None:
         raise HTTPException(

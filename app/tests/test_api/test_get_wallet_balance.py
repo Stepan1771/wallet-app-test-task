@@ -9,7 +9,9 @@ async def test_get_wallet_balance_success(
         sample_wallet,
 ):
     wallet_uuid = sample_wallet.uuid
-    response = await client.get(f"/api/v1/wallets/{wallet_uuid}")
+    response = await client.get(
+        f"/api/v1/wallets/{wallet_uuid}",
+    )
     assert response.status_code == 200
     data = response.json()
     assert data["uuid"] == wallet_uuid
@@ -21,7 +23,9 @@ async def test_get_wallet_balance_not_found(
         client: AsyncClient,
 ):
     fake_uuid = str(uuid4())
-    response = await client.get(f"/api/v1/wallets/{fake_uuid}")
+    response = await client.get(
+        f"/api/v1/wallets/{fake_uuid}",
+    )
     assert response.status_code == 404
     data = response.json()
     assert "detail" in data
@@ -34,7 +38,9 @@ async def test_get_wallet_with_zero_balance(
         empty_wallet,
 ):
     wallet_uuid = empty_wallet.uuid
-    response = await client.get(f"/api/v1/wallets/{wallet_uuid}")
+    response = await client.get(
+        f"/api/v1/wallets/{wallet_uuid}",
+    )
     assert response.status_code == 200
     data = response.json()
     assert data["balance"] == 0
@@ -46,7 +52,9 @@ async def test_wallet_response_structure(
         sample_wallet,
 ):
     wallet_uuid = sample_wallet.uuid
-    response = await client.get(f"/api/v1/wallets/{wallet_uuid}")
+    response = await client.get(
+        f"/api/v1/wallets/{wallet_uuid}",
+    )
     assert response.status_code == 200
     data = response.json()
     required_fields = ["uuid", "balance"]
@@ -57,13 +65,17 @@ async def test_wallet_response_structure(
 
 
 @pytest.mark.asyncio
-async def test_wallet_with_large_balance(client: AsyncClient):
+async def test_wallet_with_large_balance(
+        client: AsyncClient,
+):
     from tests.mock_data import MockWallet, add_mock_wallet
 
     large_balance = 999_999_999_999
     wallet = MockWallet(balance=large_balance)
     add_mock_wallet(wallet)
-    response = await client.get(f"/api/v1/wallets/{wallet.uuid}")
+    response = await client.get(
+        f"/api/v1/wallets/{wallet.uuid}",
+    )
     assert response.status_code == 200
     data = response.json()
     assert data["balance"] == large_balance

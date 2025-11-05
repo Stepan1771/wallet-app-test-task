@@ -6,7 +6,9 @@ from httpx import AsyncClient
 async def test_create_wallet_success(
         client: AsyncClient,
 ):
-    response = await client.post(f"/api/v1/wallets/create-wallet")
+    response = await client.post(
+        f"/api/v1/wallets/create-wallet",
+    )
     assert response.status_code == 201
     data = response.json()
     assert "uuid" in data

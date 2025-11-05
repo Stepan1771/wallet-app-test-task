@@ -8,7 +8,9 @@ async def test_get_wallet_operations_success(
         sample_wallet,
 ):
     wallet_uuid = sample_wallet.uuid
-    response = await client.get(f"/api/v1/wallets/{wallet_uuid}/wallet-operations")
+    response = await client.get(
+        f"/api/v1/wallets/{wallet_uuid}/wallet-operations",
+    )
     assert response.status_code == 200
 
 
@@ -17,5 +19,7 @@ async def test_get_wallet_operations_not_found(
         client: AsyncClient,
 ):
     wallet_uuid_fake = "fake-uuid"
-    response = await client.get(f"/api/v1/wallets/{wallet_uuid_fake}/wallet-operations")
+    response = await client.get(
+        f"/api/v1/wallets/{wallet_uuid_fake}/wallet-operations",
+    )
     assert response.status_code == 404

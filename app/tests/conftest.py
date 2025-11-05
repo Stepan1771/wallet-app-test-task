@@ -1,7 +1,10 @@
 import pytest
 import pytest_asyncio
 from typing import AsyncGenerator
-from httpx import AsyncClient, ASGITransport
+from httpx import (
+    AsyncClient,
+    ASGITransport,
+)
 from unittest.mock import patch
 
 from main import main_app as app
@@ -18,10 +21,6 @@ from tests.mock_data import (
 @pytest.fixture(scope="session")
 def event_loop_policy():
     import asyncio
-    import sys
-
-    if sys.platform == "win32":
-        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
     return asyncio.get_event_loop_policy()
 
